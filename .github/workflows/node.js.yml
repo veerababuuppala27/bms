@@ -22,11 +22,10 @@ jobs:
         env:
           EC2_USER: ${{ secrets.EC2_USER }}
           EC2_IP_ADDRESS: ${{ secrets.EC2_IP_ADDRESS }}
-          APP_PATH: ${{ secrets.APP_PATH }}
         run: |
           sudo ssh -o StrictHostKeyChecking=no -i private_key.pem $EC2_USER@$EC2_IP_ADDRESS << 'EOF'
-            cd $APP_PATH
-            git pull
+            cd /home/public/bms
+            sudo git pull
             ./application_start.sh
           EOF
 
