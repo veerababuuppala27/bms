@@ -24,7 +24,7 @@ jobs:
           EC2_IP_ADDRESS: ${{ secrets.EC2_IP_ADDRESS }}
           APP_PATH: ${{ secrets.APP_PATH }}
         run: |
-          ssh -o StrictHostKeyChecking=no -i private_key.pem $EC2_USER@$EC2_IP_ADDRESS << 'EOF'
+          sudo ssh -o StrictHostKeyChecking=no -i private_key.pem $EC2_USER@$EC2_IP_ADDRESS << 'EOF'
             cd $APP_PATH
             git pull
             ./application_start.sh
