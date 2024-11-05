@@ -10,21 +10,29 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
       - name: Prepare SSH key
         run: |
-          echo "${{ secrets_SSH_PRIVATE_KEY }}" > private_key.pem
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > private_key.pem
           chmod 600 private_key.pem
 
       - name: Deploy to EC2 and execute script
+        env:
+          EC2_USER: ${{ secrets.EC2_USER }}
+          EC2_IP_ADDRESS: ${{ secrets.EC2_IP_ADDRESS }}
+          APP_PATH: ${{ secrets.APP_PATH }}
         run: |
-          ssh -o StrictHostKeyChecking=no -i private_key.pem ${{ secrets_EC2_USER }}@${{ secrets_EC2_IP_ADDRESS }} << 'EOF'
-            cd ${{ secrets_APP_PATH }}
+          ssh -o StrictHostKeyChecking=no -i private_key.pem $EC2_USER@$EC2_IP_ADDRESS << 'EOF'
+            cd $APP_PATH
             git pull
             ./application_start.sh
           EOF
 
       - name: Clean up
         run: rm -f private_key.pem
+
 
 
 
