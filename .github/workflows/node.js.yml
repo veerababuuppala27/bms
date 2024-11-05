@@ -1,21 +1,30 @@
-name: Node.js CI/CD Pipeline
+name: Deploy to EC2
 
 on:
   push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
+    branches:
+      - main
 
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
-    
+
     steps:
-      - name: Run deployment script
-        env:
-          SSH_PRIVATE_KEY: ${{ SSH_PRIVATE_KEY_KAFSCOPROD }}
-          REMOTE_USER: ${{ REMOTE_USER }}
-          REMOTE_HOST: ${{ REMOTE_HOST }}
+      - name: Prepare SSH key
         run: |
-          chmod +x ./application_start.sh
-          ./application_start.sh
+          echo "${{ secrets_SSH_PRIVATE_KEY }}" > private_key.pem
+          chmod 600 private_key.pem
+
+      - name: Deploy to EC2 and execute script
+        run: |
+          ssh -o StrictHostKeyChecking=no -i private_key.pem ${{ secrets_EC2_USER }}@${{ secrets_EC2_IP_ADDRESS }} << 'EOF'
+            cd ${{ secrets_APP_PATH }}
+            git pull
+            ./application_start.sh
+          EOF
+
+      - name: Clean up
+        run: rm -f private_key.pem
+
+
+
